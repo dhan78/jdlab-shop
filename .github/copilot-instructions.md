@@ -36,8 +36,12 @@ db/
 **When to use which**:
 - Use `prisma` in `auth.ts` and `user.actions.ts` (auth needs base client)
 - Use `prismaExtended` in `product.actions.ts`, `cart.actions.ts`, `order.actions.ts`, `review.actions.ts`
+- **IMPORTANT**: Use `prisma` (base) for aggregations (`groupBy`, `aggregate`, `count` with `_count`)
 
-**Why**: Prisma Client Extensions (`$extends`) are NOT serializable for RSC. Auth operations must use the base client to avoid RSC serialization errors.
+**Why**: 
+- Prisma Client Extensions (`$extends`) are NOT serializable for RSC
+- Auth operations must use the base client to avoid RSC serialization errors
+- Aggregation queries don't return full model fields, so compute functions fail on undefined values
 
 **CRITICAL**: In `prismaExtended` compute functions, parameter names MUST match the model type:
 ```typescript
@@ -64,8 +68,21 @@ orderItem: {
 // ✅ CORRECT - auth.ts
 import { prisma } from '@/db/prisma';
 
-// ✅ CORRECT - product.actions.ts
+// ✅ CORRECT - product.actions.ts (for standard queries)
 import { prismaExtended as prisma } from '@/db/prisma';
+
+// ✅ CORRECT - product.actions.ts (for aggregations like groupBy)
+import { prisma as basePrisma } from '@/db/prisma';
+import { prismaExtended as prisma } from '@/db/prisma';
+
+export async function getAllCategories() {
+  // Use basePrisma for groupBy to avoid compute function errors
+  const data = await basePrisma.product.groupBy({
+    by: ['category'],
+    _count: true,
+  });
+  return convertToPlainObject(data);
+}
 ```
 
 ### 2. Server Actions Pattern
@@ -154,6 +171,11 @@ NEXT_PUBLIC_APP_NAME="Prostore"
 - Run `npx prisma generate` to regenerate client
 - Delete `.next` folder to clear build cache
 - Restart dev server
+
+**Error: `Cannot read properties of undefined (reading 'toString')`**
+- This occurs when using `prismaExtended` with aggregation queries (`groupBy`, `aggregate`)
+- Solution: Use base `prisma` client for aggregations instead of `prismaExtended`
+- Example: `const data = await basePrisma.product.groupBy({ by: ['category'], _count: true })`
 
 **Error: Environment variables undefined**
 - Verify `.env` has NO SPACES around `=`
