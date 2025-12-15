@@ -13,7 +13,7 @@
     "email": "cp .env ./node_modules/react-email && email dev --dir email --port 3001"
   },
   "dependencies": {
-    "@auth/core": "0.37.4",
+    "@auth/core": "^0.37.4",
     "@auth/prisma-adapter": "^2.7.4",
     "@hookform/resolvers": "^3.9.1",
     "@paypal/react-paypal-js": "^8.7.0",
