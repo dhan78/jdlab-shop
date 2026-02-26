@@ -311,13 +311,24 @@ const ProductForm = ({
                 )}
               />
               {isFeatured && banner && (
-                <Image
-                  src={banner}
-                  alt='banner image'
-                  className='w-full object-cover object-center rounded-sm'
-                  width={1920}
-                  height={680}
-                />
+                <div className='flex flex-col gap-2'>
+                  <Image
+                    src={banner}
+                    alt='banner image'
+                    width={1920}
+                    height={680}
+                    sizes='100vw'
+                    style={{ width: '100%', height: 'auto' }}
+                  />
+                  <Button
+                    type='button'
+                    variant='outline'
+                    className='w-fit'
+                    onClick={() => form.setValue('banner', null)}
+                  >
+                    Change Banner Image
+                  </Button>
+                </div>
               )}
 
               {isFeatured && !banner && (
