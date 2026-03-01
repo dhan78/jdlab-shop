@@ -1,0 +1,19 @@
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+.next
+node_modules
+npm-debug.log*
+README.md
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Dev/test files
+tests/
+jest.config.ts
+jest.setup.ts
+*.test.ts
+*.test.tsx

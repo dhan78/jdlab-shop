@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  outputFileTracingRoot: '/var/home/admin/IdeaProjects/prostore-main',
+  output: 'standalone',
   images: {
     remotePatterns: [
       {

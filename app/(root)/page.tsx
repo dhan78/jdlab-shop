@@ -8,6 +8,8 @@ import ViewAllProductsButton from '@/components/view-all-products-button';
 import IconBoxes from '@/components/icon-boxes';
 import DealCountdown from '@/components/deal-countdown';
 
+export const dynamic = 'force-dynamic';
+
 const Homepage = async () => {
   const latestProducts = await getLatestProducts();
   const featuredProducts = await getFeaturedProducts();

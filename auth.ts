@@ -2,6 +2,7 @@
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import type { Adapter } from 'next-auth/adapters';
 import { cookies } from 'next/headers';
 import { compare } from './lib/encrypt';
 import { PrismaAdapter } from '@auth/prisma-adapter';
@@ -16,7 +17,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: 'jwt' as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  adapter: PrismaAdapter(prisma),
+  adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
     CredentialsProvider({
       credentials: {
