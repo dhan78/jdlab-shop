@@ -17,3 +17,6 @@ jest.config.ts
 jest.setup.ts
 *.test.ts
 *.test.tsx
+
+# Local DB data
+postgres_data/

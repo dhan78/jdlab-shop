@@ -15,7 +15,7 @@ RUN npx prisma generate
 
 # Provide dummy server-side secrets so Next.js page-data collection doesn't crash.
 # Real values are injected at runtime via env_file / environment.
-ENV RESEND_API_KEY=build_placeholder
+ENV RESEND_API_KEY=re_fWjzK4Q1_AtoGav1wudCCgUvLiTyr3kDY
 ENV STRIPE_SECRET_KEY=build_placeholder
 ENV STRIPE_WEBHOOK_SECRET=build_placeholder
 ENV NEXTAUTH_SECRET=build_placeholder
@@ -29,7 +29,7 @@ ENV PAYPAL_APP_SECRET=build_placeholder
 ENV UPLOADTHING_TOKEN=build_placeholder
 ENV UPLOADTHING_SECRET=build_placeholder
 ENV UPLOADTHING_APPID=build_placeholder
-ENV SENDER_EMAIL=noreply@example.com
+ENV SENDER_EMAIL=info@jdlab.us
 ENV ENCRYPTION_KEY=build_placeholder_min_32_chars_long_1234567890
 # Override NODE_OPTIONS from .env — --inspect must not run in production/build
 ENV NODE_OPTIONS=""

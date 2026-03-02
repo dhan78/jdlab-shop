@@ -1,7 +1,1 @@
-fuse: mountpoint is not empty
-fuse: if you are sure this is safe, use the 'nonempty' mount option
-Error: Failed to create FUSE session
-
-Caused by:
-    Unspecified Error
-Error: Failed to create mount process
+bucket filebucketdhan is mounted at /var/home/admin/s3

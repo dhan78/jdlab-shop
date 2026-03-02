@@ -1,4 +1,39 @@
 services:
+  # --- Existing site (jdlab.us) ---
+  nextjs:
+    build:
+      context: ../jdlab-public
+      dockerfile: Dockerfile
+    container_name: jdlab-nextjs
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+        reservations:
+          memory: 128m
+
+  # --- Prostore (shop.jdlab.us) ---
+  db:
+    image: postgres:18.3
+    container_name: postgres-prostore
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=neondb
+    volumes:
+      - ./postgres_data:/var/lib/postgresql:Z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d neondb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   app:
     build:
       context: .
@@ -6,15 +41,39 @@ services:
       args:
         NEXT_PUBLIC_APP_NAME: "${NEXT_PUBLIC_APP_NAME:-Prostore}"
         NEXT_PUBLIC_APP_DESCRIPTION: "${NEXT_PUBLIC_APP_DESCRIPTION:-A modern ecommerce store built with Next.js}"
-        NEXT_PUBLIC_SERVER_URL: "${NEXT_PUBLIC_SERVER_URL:-http://localhost:3000}"
+        NEXT_PUBLIC_SERVER_URL: "${NEXT_PUBLIC_SERVER_URL:-https://shop.jdlab.us}"
         NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}"
     container_name: prostore-app
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     env_file:
       - .env
     environment:
-      DATABASE_URL: "postgresql://postgres:secret@host.containers.internal:5432/neondb?schema=public"
+      DATABASE_URL: "postgresql://postgres:secret@db:5432/neondb?schema=public"
       NODE_OPTIONS: ""
       AUTH_TRUST_HOST: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # --- Reverse proxy (handles both sites + auto HTTPS) ---
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro,z
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - nextjs
+      - app
+
+volumes:
+  caddy_data:
+  caddy_config:
