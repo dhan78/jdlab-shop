@@ -27,7 +27,7 @@ services:
       - POSTGRES_PASSWORD=secret
       - POSTGRES_DB=neondb
     volumes:
-      - ./postgres_data:/var/lib/postgresql:Z
+      - ./postgres_data:/var/lib/postgresql/data:Z
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d neondb"]
       interval: 5s
