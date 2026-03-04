@@ -1,9 +1,13 @@
+# docker-compose.prod.yml — Pull pre-built images from GHCR and run on EC2
+# Usage:
+#   1. Copy this file, Caddyfile, and .env to your EC2 instance
+#   2. podman compose -f docker-compose.prod.yml pull
+#   3. podman compose -f docker-compose.prod.yml up -d
+
 services:
   # --- Existing site (jdlab.us) ---
   nextjs:
-    build:
-      context: ../jdlab-public
-      dockerfile: Dockerfile
+    image: ghcr.io/dhan78/jdlab:latest
     container_name: jdlab-nextjs
     restart: unless-stopped
     expose:
@@ -24,10 +28,10 @@ services:
     restart: always
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=secret
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-secret}
       - POSTGRES_DB=neondb
     volumes:
-      - ./postgres_data:/var/lib/postgresql:Z
+      - postgres_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d neondb"]
       interval: 5s
@@ -35,14 +39,7 @@ services:
       retries: 10
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_APP_NAME: "${NEXT_PUBLIC_APP_NAME:-Prostore}"
-        NEXT_PUBLIC_APP_DESCRIPTION: "${NEXT_PUBLIC_APP_DESCRIPTION:-A modern ecommerce store built with Next.js}"
-        NEXT_PUBLIC_SERVER_URL: "${NEXT_PUBLIC_SERVER_URL:-https://shop.jdlab.us}"
-        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: "${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}"
+    image: ghcr.io/dhan78/prostore:latest
     container_name: prostore-app
     restart: unless-stopped
     expose:
@@ -50,7 +47,7 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: "postgresql://postgres:secret@db:5432/neondb?schema=public"
+      DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD:-secret}@db:5432/neondb?schema=public"
       NODE_OPTIONS: ""
       AUTH_TRUST_HOST: "true"
     depends_on:
@@ -67,7 +64,7 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro,z
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -75,5 +72,6 @@ services:
       - app
 
 volumes:
+  postgres_data:
   caddy_data:
   caddy_config:
