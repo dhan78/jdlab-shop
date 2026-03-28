@@ -54,6 +54,32 @@ services:
       db:
         condition: service_healthy
 
+  # --- outline ---
+  outline:
+    image: outlinewiki/outline:latest
+    container_name: outline
+    restart: unless-stopped
+    expose:
+      - "3000"
+    env_file: ./outline.env
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD:-secret}@db:5432/outline
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:alpine
+    container_name: outline-redis
+    restart: unless-stopped
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+
   # --- Reverse proxy (handles both sites + auto HTTPS) ---
   caddy:
     image: caddy:2-alpine
@@ -70,6 +96,7 @@ services:
     depends_on:
       - nextjs
       - app
+      - outline 
 
 volumes:
   postgres_data:
