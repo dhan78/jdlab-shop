@@ -4,7 +4,8 @@
 #   tag defaults to "latest"
 #
 # Prerequisites:
-#   1. Log in to GHCR first:
+#   1. Log in to GHCR first:ARG PORTAL_JWT_SECRET="build_placeholder_secret"
+
 #      echo $GITHUB_PAT | podman login ghcr.io -u dhan78 --password-stdin
 #
 #   2. Create a GitHub Personal Access Token (classic) with:
@@ -27,10 +28,12 @@ echo "============================================"
 echo ""
 echo ">>> Building Prostore image..."
 podman build \
+  --platform linux/arm64 \
   --build-arg NEXT_PUBLIC_APP_NAME="${NEXT_PUBLIC_APP_NAME:-Prostore}" \
   --build-arg NEXT_PUBLIC_APP_DESCRIPTION="${NEXT_PUBLIC_APP_DESCRIPTION:-A modern ecommerce store built with Next.js}" \
   --build-arg NEXT_PUBLIC_SERVER_URL="${NEXT_PUBLIC_SERVER_URL:-https://shop.jdlab.us}" \
   --build-arg NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}" \
+  --build-arg PORTAL_JWT_SECRET="placeholder_for_build_step" \
   -t "${PROSTORE_IMAGE}" \
   -f Dockerfile \
   .
@@ -40,6 +43,8 @@ if [ -d "../jdlab-public" ]; then
   echo ""
   echo ">>> Building jdlab image..."
   podman build \
+    --platform linux/arm64 \
+    --build-arg PORTAL_JWT_SECRET="placeholder_for_build_step" \
     -t "${JDLAB_IMAGE}" \
     -f ../jdlab-public/Dockerfile \
     ../jdlab-public
